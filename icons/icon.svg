@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081624"/>
+      <stop offset="50%" stop-color="#0B2234"/>
+      <stop offset="100%" stop-color="#05101A"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5A0"/>
+      <stop offset="45%" stop-color="#10E5B6"/>
+      <stop offset="85%" stop-color="#00D2FF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="specular" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.02"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="509" height="509" rx="114.5" stroke="url(#specular)" stroke-width="2.5" fill="none"/>
+
+  <!-- Ambient Vitality Aura -->
+  <circle cx="265" cy="245" r="140" fill="#00F5A0" opacity="0.18" filter="url(#glow)"/>
+
+  <!-- Glowing Underlay -->
+  <g filter="url(#glow)" opacity="0.45">
+    <path d="M174 130 C174 121 181 114 190 114 L282 114 C344 114 388 156 388 216 C388 266 350 304 302 314 L370 416 C376 424 370 436 358 436 L316 436 C307 436 299 431 293 423 L236 332 L236 424 C236 431 230 436 223 436 L187 436 C180 436 174 431 174 424 Z" fill="url(#brand)"/>
+  </g>
+
+  <!-- Sharp Main R-Glyph -->
+  <path d="M174 130 C174 121 181 114 190 114 L282 114 C344 114 388 156 388 216 C388 266 350 304 302 314 L370 416 C376 424 370 436 358 436 L316 436 C307 436 299 431 293 423 L236 332 L236 424 C236 431 230 436 223 436 L187 436 C180 436 174 431 174 424 Z M236 174 L236 276 L280 276 C314 276 334 254 334 216 C334 178 314 174 280 174 Z" fill="url(#brand)"/>
+
+  <!-- Radiant Metabolic Core Dot -->
+  <circle cx="280" cy="216" r="16" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="280" cy="216" r="26" fill="#00F5A0" opacity="0.4" filter="url(#glow)"/>
+</svg>

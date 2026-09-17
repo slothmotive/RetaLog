@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#060B12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#E6EDF5" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="RetaLog: a private, offline-first tracker for your Retatrutide weight-loss and diabetes journey: weight, glucose, dose calculator and habits.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RetaLog">
+<title>RetaLog: Personal Weight, Glucose &amp; Reta Intake Tracker</title>
+<!-- apply saved theme before first paint to avoid a flash -->
+<script>try{var t=localStorage.getItem('retalog.theme');t=t?JSON.parse(t).value:'system';
+var l=t==='light'||(t==='system'&&matchMedia('(prefers-color-scheme:light)').matches);
+document.documentElement.dataset.theme=l?'light':'dark';}catch(e){}</script>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+<script src="vendor/chart.umd.min.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+
+<noscript style="display:block;padding:40px 20px;color:#eaf3f0;font-family:system-ui">
+  This dashboard needs JavaScript. Enable it in your browser settings: everything runs locally on your device.
+</noscript>
+
+<!-- ================= desktop rail (hidden on mobile) ================= -->
+<nav class="desk-rail" aria-label="Main">
+  <div class="desk-brand">
+    <div class="brand-mark"><svg viewBox="0 0 512 512" fill="none"><path d="M174 130 C174 121 181 114 190 114 L282 114 C344 114 388 156 388 216 C388 266 350 304 302 314 L370 416 C376 424 370 436 358 436 L316 436 C307 436 299 431 293 423 L236 332 L236 424 C236 431 230 436 223 436 L187 436 C180 436 174 431 174 424 Z M236 174 L236 276 L280 276 C314 276 334 254 334 216 C334 178 314 174 280 174 Z" fill="#FFFFFF"/><circle cx="280" cy="216" r="18" fill="#10B981"/></svg></div>
+    <div class="brand-txt">
+      <div class="brand-name">RetaLog</div>
+      <div class="brand-sub">Weight · Glucose · Reta</div>
+    </div>
+  </div>
+  <button class="desk-nav-item nav-link on" data-view="today">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg> Today
+  </button>
+  <button class="desk-nav-item nav-link" data-view="trends">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/></svg> Trends
+  </button>
+  <button class="desk-nav-item nav-link" data-view="dose">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3l7 7-4 4-7-7z"/><path d="M10 7L3 14v7h7l7-7"/><path d="M6 21l-2 2"/></svg> Dose
+  </button>
+  <button class="desk-nav-item nav-link" data-view="more">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg> More
+  </button>
+  <button class="desk-nav-fab btn primary" id="deskFab">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Log entry
+  </button>
+  <div class="desk-foot">
+    Your data never leaves this device unless you export or sync it.<br><br>
+    Not medical advice. Built to inform, not replace, conversations with your clinician.
+  </div>
+</nav>
+
+<!-- mobile topbar -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 512 512" fill="none"><path d="M174 130 C174 121 181 114 190 114 L282 114 C344 114 388 156 388 216 C388 266 350 304 302 314 L370 416 C376 424 370 436 358 436 L316 436 C307 436 299 431 293 423 L236 332 L236 424 C236 431 230 436 223 436 L187 436 C180 436 174 431 174 424 Z M236 174 L236 276 L280 276 C314 276 334 254 334 216 C334 178 314 174 280 174 Z" fill="#FFFFFF"/><circle cx="280" cy="216" r="18" fill="#10B981"/></svg></div>
+      <div class="brand-txt">
+        <div class="brand-name">RetaLog</div>
+        <div class="brand-sub">Weight · Glucose · Reta</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="pill" id="streakPill"><i class="dot"></i> <b>--</b></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><path d="M20 14.5A8 8 0 0 1 10 4a7 7 0 0 0 10 10.5z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- desktop heading -->
+  <div class="desk-h">
+    <h1 id="deskTitle">Today</h1>
+    <span class="pill" id="deskPill"><i class="dot"></i> <b>--</b></span>
+  </div>
+
+  <!-- ============================ TODAY ============================ -->
+  <main id="view-today" class="view active" aria-label="Today">
+    <section class="hero reveal" id="hero">
+      <div class="hero-top">
+        <div class="ring-wrap">
+          <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#39E3A6"/><stop offset="55%" stop-color="#12D0B4"/><stop offset="100%" stop-color="#5BB0EC"/>
+              </linearGradient>
+            </defs>
+            <circle cx="66" cy="66" r="54" fill="none" style="stroke:var(--stroke-2)" stroke-width="11"/>
+            <circle id="ringFg" cx="66" cy="66" r="54" fill="none" stroke="url(#ringGrad)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" style="transition:stroke-dashoffset 1.1s cubic-bezier(.22,.61,.36,1)"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-num"><span id="heroLost">0.0</span><em>kg</em></div>
+            <div class="ring-lbl">of goal lost</div>
+          </div>
+        </div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+      <div class="hero-eta">
+        <div>
+          <div class="eta-l">Projected to reach goal</div>
+          <div class="eta-v" id="etaVal">log 2+ weeks of weight</div>
+        </div>
+        <div class="spark-mini"><canvas id="spark" height="34"></canvas></div>
+      </div>
+    </section>
+
+    <div class="stat-grid" id="statGrid"></div>
+
+    <section class="card" id="waterCard"></section>
+    <section class="card" id="doseCard"></section>
+    <section class="card" id="habitCard"></section>
+    <section class="card" id="sparkCard"></section>
+    <section class="card" id="todayLogCard"></section>
+
+    <p class="disclaimer">RetaLog is a personal logging tool: not medical advice, and not a substitute for your clinician. If a reading or symptom concerns you, contact your care team.</p>
+  </main>
+
+  <!-- ============================ TRENDS ============================ -->
+  <main id="view-trends" class="view" aria-label="Trends">
+    <div class="seg" id="rangeSeg" role="tablist" aria-label="Time range">
+      <button data-range="7" role="tab">7D</button>
+      <button data-range="30" class="on" role="tab">30D</button>
+      <button data-range="90" role="tab">90D</button>
+      <button data-range="0" role="tab">ALL</button>
+    </div>
+    <div id="chartsHost"></div>
+    <p class="disclaimer">Daily dots are noise: follow the smoothed line. Big water-weight swings are normal, especially after a dose increase.</p>
+  </main>
+
+  <!-- ============================ DOSE ============================ -->
+  <main id="view-dose" class="view" aria-label="Dose">
+    <section class="card" id="calcCard"></section>
+    <section class="card" id="nextDoseCard"></section>
+    <section class="card" id="ladderCard"></section>
+    <section class="card" id="siteCard"></section>
+    <section class="card" id="symptomCard"></section>
+    <section class="card" id="labCard"></section>
+    <p class="disclaimer">Doses and titration should follow your own prescription. The ladder and calculator are reference tools for your own protocol: bring them to your clinician, not to your syringe.</p>
+  </main>
+
+  <!-- ============================ MORE ============================ -->
+  <main id="view-more" class="view" aria-label="More">
+    <section class="card" id="appearanceCard"></section>
+    <section class="card" id="profileCard"></section>
+    <section class="card" id="tipsCard"></section>
+    <section class="card" id="reconCard"></section>
+    <section class="card" id="planCard"></section>
+    <section class="card" id="goalCard"></section>
+    <section class="card" id="badgeCard"></section>
+    <section class="card" id="dataCard"></section>
+    <section class="card" id="aboutCard"></section>
+  </main>
+</div>
+
+<!-- ================= mobile bottom nav ================= -->
+<nav class="nav" aria-label="Main">
+  <div class="nav-inner">
+    <span class="nav-ind" id="navInd"></span>
+    <button class="nav-item nav-link on" data-view="today">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Today</span>
+    </button>
+    <button class="nav-item nav-link" data-view="trends">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/></svg><span>Trends</span>
+    </button>
+    <button class="nav-fab" id="fab" aria-label="Log entry">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <button class="nav-item nav-link" data-view="dose">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3l7 7-4 4-7-7z"/><path d="M10 7L3 14v7h7l7-7"/></svg><span>Dose</span>
+    </button>
+    <button class="nav-item nav-link" data-view="more">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ================= sheets ================= -->
+<div class="scrim" id="scrim"></div>
+
+<div class="sheet" id="sheet-add" role="dialog" aria-label="Log entry">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2>Log an entry</h2>
+    <button class="icon-btn sheet-close" data-close aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="add-grid" id="addGrid"></div>
+</div>
+
+<div class="sheet" id="sheet-form" role="dialog" aria-label="Form">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="formTitle">Log</h2>
+    <button class="icon-btn sheet-close" data-close aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <form id="formBody" novalidate></form>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- ================= onboarding ================= -->
+<div class="ob" id="ob">
+  <div class="ob-inner">
+    <div class="ob-progress" id="obProgress">
+      <div class="ob-bar on" data-step="0"></div>
+      <div class="ob-bar" data-step="1"></div>
+      <div class="ob-bar" data-step="2"></div>
+      <div class="ob-bar" data-step="3"></div>
+    </div>
+
+    <!-- Step 0: Welcome -->
+    <div class="ob-step on" data-step="0">
+      <div class="ob-hero-wrap">
+        <div class="ob-icon-glow">
+          <div class="brand-mark lg">
+            <svg viewBox="0 0 512 512" fill="none"><path d="M174 130 C174 121 181 114 190 114 L282 114 C344 114 388 156 388 216 C388 266 350 304 302 314 L370 416 C376 424 370 436 358 436 L316 436 C307 436 299 431 293 423 L236 332 L236 424 C236 431 230 436 223 436 L187 436 C180 436 174 431 174 424 Z M236 174 L236 276 L280 276 C314 276 334 254 334 216 C334 178 314 174 280 174 Z" fill="#FFFFFF"/><circle cx="280" cy="216" r="18" fill="#10B981"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="ob-eyebrow">Private Health Journal</div>
+      <h1>Your transformation,<br>measured with precision.</h1>
+      <p>A private, on-device companion for your Retatrutide journey: weight dynamics, glucose trends, and exact syringe units in one place.</p>
+      
+      <div class="ob-features">
+        <div class="ob-feat">
+          <div class="ob-feat-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="ob-feat-txt"><b>100% On-Device Privacy</b><span>Zero accounts, zero trackers. Your data never leaves this phone.</span></div>
+        </div>
+        <div class="ob-feat">
+          <div class="ob-feat-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3l7 7-4 4-7-7z"/><path d="M10 7L3 14v7h7l7-7"/><path d="M6 21l-2 2"/></svg></div>
+          <div class="ob-feat-txt"><b>Precision Syringe Maths</b><span>Turns your reconstitution ratio into exact 100-unit syringe marks.</span></div>
+        </div>
+        <div class="ob-feat">
+          <div class="ob-feat-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="ob-feat-txt"><b>Signal Over Daily Noise</b><span>7-day moving averages and clinical bands for fasting glucose.</span></div>
+        </div>
+      </div>
+
+      <div class="ob-foot">
+        <button class="btn ghost" id="obSkip">Load demo data</button>
+        <button class="btn primary" data-next>Get started</button>
+      </div>
+    </div>
+
+    <!-- Step 1: Profile -->
+    <div class="ob-step" data-step="1">
+      <div class="ob-eyebrow">Step 1 of 3 · Profile</div>
+      <h1>Where are you<br>starting from?</h1>
+      <p>We compute your rate of loss, projected goal date, and milestones from your starting numbers.</p>
+      
+      <div class="ob-card-form">
+        <div class="field-row">
+          <div class="field"><label>Starting weight (kg)</label><input id="obStart" type="number" inputmode="decimal" placeholder="87.4" step="0.1"></div>
+          <div class="field"><label>Height (cm)</label><input id="obHeight" type="number" inputmode="numeric" placeholder="178" step="1"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Target weight (kg)</label><input id="obTarget" type="number" inputmode="decimal" placeholder="78" step="0.1"></div>
+          <div class="field"><label>Sex</label>
+            <select id="obSex"><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+        </div>
+        <div class="ob-live-chip" id="obBmiChip"></div>
+      </div>
+      <div class="ob-err" id="obErr1" style="display:none"></div>
+      
+      <div class="ob-foot"><button class="btn ghost" data-back>Back</button><button class="btn primary" data-next>Continue</button></div>
+    </div>
+
+    <!-- Step 2: Glucose -->
+    <div class="ob-step" data-step="2">
+      <div class="ob-eyebrow">Step 2 of 3 · Glucose</div>
+      <h1>How should we read<br>your glucose?</h1>
+      <p>Select your blood glucose units and personalized fasting range. Post-meal guideline is 180 mg/dL.</p>
+      
+      <div class="ob-card-form">
+        <div class="field"><label>Glucose units</label>
+          <div class="seg-toggle" id="obUnits"><button data-u="mgdl" class="on">mg/dL</button><button data-u="mmol">mmol/L</button></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Fasting low</label><input id="obFLo" type="number" inputmode="numeric" placeholder="80"></div>
+          <div class="field"><label>Fasting high</label><input id="obFHi" type="number" inputmode="numeric" placeholder="130"></div>
+        </div>
+        <div class="hint">Standard clinical fasting target: 80–130 mg/dL (4.4–7.2 mmol/L).</div>
+      </div>
+      
+      <div class="ob-foot"><button class="btn ghost" data-back>Back</button><button class="btn primary" data-next>Continue</button></div>
+    </div>
+
+    <!-- Step 3: Reconstitution & Protocol -->
+    <div class="ob-step" data-step="3">
+      <div class="ob-eyebrow">Step 3 of 3 · Reconstitution &amp; Protocol</div>
+      <h1>Vial strength &amp;<br>starting dose</h1>
+      <p>Enter your vial mixing ratio to calculate exact syringe units. You must specify your vial to proceed.</p>
+      
+      <div class="ob-card-form">
+        <div class="ob-section-tag">Vial Reconstitution (Required)</div>
+        <div class="field-row">
+          <div class="field"><label>Vial amount (mg) <span class="req">*</span></label><input id="obVial" type="number" inputmode="decimal" step="any" placeholder="e.g. 10"></div>
+          <div class="field"><label>BAC water added (ml) <span class="req">*</span></label><input id="obBac" type="number" inputmode="decimal" step="any" placeholder="e.g. 2"></div>
+        </div>
+        <div class="ob-recon-badge" id="obRecon"></div>
+
+        <div class="ob-section-tag" style="margin-top:14px">Titration &amp; Schedule</div>
+        <div class="field">
+          <label>Injection frequency</label>
+          <select id="obFreq">
+            <option value="7" selected>Every 7 days (Once weekly)</option>
+            <option value="3.5">Every 3.5 days (Twice weekly / split)</option>
+            <option value="5">Every 5 days</option>
+            <option value="4">Every 4 days</option>
+            <option value="3">Every 3 days</option>
+            <option value="6">Every 6 days</option>
+            <option value="10">Every 10 days</option>
+            <option value="14">Every 14 days (Every 2 weeks)</option>
+            <option value="custom">Custom days...</option>
+          </select>
+        </div>
+        <div class="field" id="obFreqCustomWrap" style="display:none">
+          <label>Custom interval (days)</label>
+          <input id="obFreqCustom" type="number" inputmode="decimal" step="any" min="1" max="60" placeholder="e.g. 5">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Starting dose (mg) <span class="req">*</span></label><input id="obStartDose" type="number" inputmode="decimal" step="0.5" min="0.5" max="30" placeholder="0.5" value="0.5"></div>
+          <div class="field"><label>Increase every</label>
+            <select id="obWk">
+              <option value="1">1 week</option>
+              <option value="2">2 weeks</option>
+              <option value="3">3 weeks</option>
+              <option value="4" selected>4 weeks</option>
+              <option value="6">6 weeks</option>
+              <option value="8">8 weeks</option>
+              <option value="custom">Custom weeks...</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="obWkCustomWrap" style="display:none">
+          <label>Custom increase interval (weeks)</label>
+          <input id="obWkCustom" type="number" inputmode="numeric" min="1" max="52" placeholder="e.g. 6">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Step up by (mg)</label>
+            <select id="obStep"><option value="0.5" selected>0.5 mg</option><option value="1">1 mg</option><option value="1.5">1.5 mg</option><option value="2">2 mg</option><option value="2.5">2.5 mg</option><option value="5">5 mg</option></select>
+          </div>
+          <div class="field"><label>Max dose (mg)</label>
+            <select id="obMax">
+              <option value="5">5 mg</option>
+              <option value="10">10 mg</option>
+              <option value="12">12 mg</option>
+              <option value="15">15 mg</option>
+              <option value="20">20 mg</option>
+              <option value="24">24 mg</option>
+              <option value="25">25 mg</option>
+              <option value="30" selected>30 mg</option>
+              <option value="custom">Custom max dose...</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="obMaxCustomWrap" style="display:none">
+          <label>Custom max dose (mg)</label>
+          <input id="obMaxCustom" type="number" inputmode="decimal" step="any" min="0.5" max="100" placeholder="e.g. 35">
+        </div>
+        <div class="hint" id="obLadder"></div>
+      </div>
+      
+      <div class="ob-err" id="obErr3" style="display:none"></div>
+      <div class="ob-foot"><button class="btn ghost" data-back>Back</button><button class="btn primary" id="obFinish">Start logging</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
